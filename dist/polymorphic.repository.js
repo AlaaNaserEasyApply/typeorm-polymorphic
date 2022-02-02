@@ -83,7 +83,7 @@ class AbstractPolymorphicRepository extends typeorm_1.Repository {
                     Array.isArray(results) &&
                     results.length > 0 &&
                     Array.isArray(results[0])
-                    ? results.reduce((resultEntities, entities) => entities.concat(...resultEntities), results)
+                    ? results.reduce((resultEntities, entities) => entities.concat(...resultEntities))
                     : results),
             };
         });
@@ -189,6 +189,8 @@ class AbstractPolymorphicRepository extends typeorm_1.Repository {
                 return results;
             }
             const metadata = this.getPolymorphicMetadata();
+            if (metadata.length > 0 || !metadata[0].eager)
+                return results;
             return Promise.all(results.map((entity) => this.hydratePolymorphs(entity, metadata)));
         });
     }
@@ -214,7 +216,7 @@ class AbstractPolymorphicRepository extends typeorm_1.Repository {
                 optionsOrConditions
                 ? yield _super.findOne.call(this, idOrOptionsOrConditions, optionsOrConditions)
                 : yield _super.findOne.call(this, idOrOptionsOrConditions);
-            if (!entity) {
+            if (!entity || !polymorphicMetadata[0].eager) {
                 return entity;
             }
             return this.hydratePolymorphs(entity, polymorphicMetadata);

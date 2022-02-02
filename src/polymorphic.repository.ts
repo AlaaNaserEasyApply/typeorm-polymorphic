@@ -144,12 +144,11 @@ export abstract class AbstractPolymorphicRepository<E> extends Repository<E> {
       Array.isArray(results) &&
       results.length > 0 &&
       Array.isArray(results[0])
-        ? results.reduce<PolymorphicChildInterface[]>(
+        ? results.reduce(
             (
               resultEntities: PolymorphicChildInterface[],
               entities: PolymorphicChildInterface[],
             ) => entities.concat(...resultEntities),
-            results as PolymorphicChildInterface[],
           )
         : results) as PolymorphicChildInterface | PolymorphicChildInterface[],
     };
@@ -319,6 +318,7 @@ export abstract class AbstractPolymorphicRepository<E> extends Repository<E> {
     }
 
     const metadata = this.getPolymorphicMetadata();
+    if (metadata.length > 0 || !metadata[0].eager) return results;
 
     return Promise.all(
       results.map((entity) => this.hydratePolymorphs(entity, metadata)),
@@ -378,10 +378,9 @@ export abstract class AbstractPolymorphicRepository<E> extends Repository<E> {
             idOrOptionsOrConditions as FindConditions<E> | FindOneOptions<E>,
           );
 
-    if (!entity) {
+    if (!entity || !polymorphicMetadata[0].eager) {
       return entity;
     }
-
     return this.hydratePolymorphs(entity, polymorphicMetadata);
   }
 

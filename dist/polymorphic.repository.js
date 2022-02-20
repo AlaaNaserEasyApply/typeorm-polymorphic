@@ -189,7 +189,7 @@ class AbstractPolymorphicRepository extends typeorm_1.Repository {
                 return results;
             }
             const metadata = this.getPolymorphicMetadata();
-            if (metadata.length > 0 || !metadata[0].eager)
+            if (metadata.length > 0 && !metadata[0].eager)
                 return results;
             return Promise.all(results.map((entity) => this.hydratePolymorphs(entity, metadata)));
         });
